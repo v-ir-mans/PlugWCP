@@ -1,3 +1,4 @@
+from functions.configManager import config as createConfig, parent_dir
 import sys
 
 class Logger(object):
@@ -15,8 +16,7 @@ class Logger(object):
     def flush(self):
         self.file.flush()
 
-sys.stdout = Logger("assets/data/output.log")
-
+sys.stdout = Logger(f"{parent_dir}app/data/output.log")
 
 print("""  _____  _          __          _______ _____  
  |  __ \| |         \ \        / / ____|  __ \ 
@@ -35,52 +35,18 @@ def signal_handler(sig, frame):
     exit()
 signal.signal(signal.SIGINT, signal_handler)
 
-#Code itself  |
-#            \ /
-#             V
+#Code itself 
+config=createConfig()
 
+from functions.pricesDBmanager import pricesDB as createPricesDB
+pricesDB=createPricesDB(f"{parent_dir}app/data/cenas.sqlite","main")
 
-#imports config dictionary
-import assets.functions.config as fc
-config=fc.config()
+from functions.scraping import main as scrapeAndUpdateDB
+scrape_result=scrapeAndUpdateDB(config,pricesDB)
+if scrape_result:
+    print("Completed full scan")
+else:
+    print("Full scan was not needed")
 
-#Imports and creates Shelly plug
-from assets.functions.shelly_plug import connectPlug
-def createPlug(this_config):
-    con_type=this_config.data["plug"]["connection"]
-    return connectPlug(con_type,this_config.data["plug"][con_type])
-
-maija=createPlug(config)
-
-def switchPlug(state):
-    print(f"Change plug to {state}")
-    maija.turn(state)
-
-#Gets trigger times
-from updateDB import main as getTT
-real_trigger_times=getTT()
-
-
-#Creates empty trigger time manager
-import assets.functions.trigger_times as trigger_times
-gen_trigger_times=trigger_times.genTT(len=5,sec=5)
-
-TT_manager=trigger_times.triger_times_manager(switchPlug,real_trigger_times)
-TT_manager.initiate()
-
-
-while True:
-    if config.hasChanged():
-        
-        print("Spotted change")
-
-        #update all
-        #--update config
-        config.load()
-        #--update plug
-        maija=createPlug(config)
-        #--update trigger times
-        real_trigger_times=getTT()
-        gen_trigger_times=trigger_times.genTT(len=5,sec=5)
-        TT_manager.createPlan(real_trigger_times)
-
+from functions.triggerTimes import getTriggerTimes
+(print(getTriggerTimes(pricesDB,config.data["treshold_price"])))

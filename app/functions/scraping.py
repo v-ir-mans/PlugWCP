@@ -1,5 +1,4 @@
-from functions.pricesDBmanager import pricesDB as createPricesDB
-from functions.configManager import config as createConfig, parent_dir
+
 
 import requests
 from bs4 import BeautifulSoup
