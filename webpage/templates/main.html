@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>PlugWCP2</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&amp;display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/Navbar-Centered-Links-icons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <nav class="navbar navbar-light navbar-expand-md py-3">
+        <div class="container"><a class="navbar-brand d-flex align-items-center" href="#"><span>PlugWCP</span></a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navcol-3">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#">Maija</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Paija</a></li>
+                </ul><button class="btn btn-primary" id="restart" type="button" onClick="refreshPage()">Restartēt lapu</button>
+            </div>
+        </div>
+    </nav>
+    <div class="row gx-3 gy-4" id="first_line" style="padding: 24px 0px 0px;padding-top: 24px;padding-left: 10px;padding-right: 10px;">
+        <div class="col-sm-10 col-lg-4" id="slider_box">
+            <h3 style="text-align: center;line-height: 32.552px;">Jaunā cena:<span class="bubble"><span id="new_price">0.89</span><span>€</span></span></h3>
+            <div class="row">
+                <div class="col-lg-9 text-center align-self-center">
+                    <input id="slider" class="form-range" type="range" min="0" max="1" value="0.5" step="0.01" oninput="showVal(this.value)"></div>
+                <div class="col text-center"><button class="btn btn-primary" id="confirmTPchange" type="button" onClick="changeTreshPrice()">OK</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-3 col-sm-2 col-lg-2 col-xl-1 text-center align-self-center" id="switch_box" style="height: 139px;"><button class="btn btn-primary" id="switch_button" type="button"><img src="{{ url_for('static', filename='images/bulb.png') }}" style="display: block;height: 50%;"><span>Text</span></button></div>
+        <div class="col-9 col-sm-12 col-md-12 col-lg-6 col-xl-7">
+            <ul class="list-group">
+                <li class="list-group-item"><span>Šībrīža griesti:</span><span class="bubble">{{treshold_price}}€</span></li>
+                <li class="list-group-item"><span>Cena biržā:</span><span class="bubble">{{cur_price}}€</span></li>
+                <li class="list-group-item"><span>Savienošanās veids:</span><span class="bubble">{{con_type}}</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="row g-0" id="sec-line">
+        <div class="col-12 col-lg-6 text-center" style="margin-bottom: 19px;">
+            <h3>Konsole:</h3>
+            <div id="console_box" style="height: 396px;overflow: auto;">
+                <ol>
+                    {% for item in logs %}
+                    <li style="white-space: pre;"> {{ item }} </li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </div>
+        <div class="col" id="priceembed-box" style="text-align: center;">
+            <h3>E-cena:</h3>
+            <div class="ratio ratio-16x9"><iframe src="https://e-cena.lv/"></iframe></div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{url_for('static', filename='js/functions.js')}}"></script>
+
+    <script>
+        function showVal(value) {
+            var s= document.getElementById("new_price");
+            s.innerHTML = value;
+        }
+        let tresh_price="{{treshold_price}}"
+        showVal(tresh_price)
+        var slider =document.getElementById("slider")
+        slider.value=tresh_price;
+        
+        function refreshPage(){
+            window.location.reload();
+        } 
+        
+        function changeTreshPrice(){
+            new_price=slider.value
+            post({"treshold_price":new_price},"/change/treshold_price")
+            alert("Cenas griesti ir nomainīti uz "+new_price+"€")
+        }
+    </script>
+</body>
+
+</html>
