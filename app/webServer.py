@@ -1,5 +1,5 @@
 from flask import Flask,Blueprint, render_template, request
-from app.functions.configManager import config, parent_dir
+from functions.configManager import config, parent_dir
 import sqlite3
 from datetime import datetime
 

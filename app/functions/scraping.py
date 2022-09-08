@@ -53,6 +53,7 @@ def fullScanCheck(this_config, DB):
 def main(config, pricesDB):
 
     if not(fullScanCheck(config, pricesDB)):
+        print("Full scan was not needed")
         return False
 
     scrape_data=scrape()
@@ -63,5 +64,6 @@ def main(config, pricesDB):
     
     pricesDB.deleteOld()
 
+    print("Completed full scan")
     return True
 
