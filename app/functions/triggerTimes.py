@@ -7,16 +7,13 @@ class manager:
     def __init__(self, target_function,TT_list=[] ):
         self.sheduler=BackgroundScheduler(timezone="Europe/Riga")
         self.target_func=target_function
-        self.createPlan(TT_list)
+        self.TT_list=TT_list
     def initiate(self):
         self.sheduler.start()
     def clearPlan(self):
         self.sheduler.remove_all_jobs()
-    def createPlan(self,new_TT_list):
-        self.clearPlan()
-        for TT in new_TT_list:
-            self.sheduler.add_job(self.target_func,'date',run_date=(TT[0]),args=[TT[1]], misfire_grace_time=None)
-        self.TT_list=new_TT_list
+    def newTT(self,date,func_args):
+        self.sheduler.add_job(self.target_func,'date',run_date=date,args=func_args, misfire_grace_time=None)
 
 
 def genPereodicalTime(len=5, sec=3):

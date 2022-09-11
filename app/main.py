@@ -40,8 +40,15 @@ signal.signal(signal.SIGINT, signal_handler)
 
 config=createConfig()
 
-def turnLights(state):
-    print(8*"-"+"Lights go brr and " + state)
+from functions.shellyPlug import connectPlug
+def createPlug(config):
+    con_type=config.data["plug"]["connection"]
+    return connectPlug(con_type,config.data["plug"][con_type])
+maija=createPlug(config)
+
+def turnLights(state, plug):
+    plug.turn(state)
+    print(state)
 
 
 from functions.pricesDBmanager import pricesDB as createPricesDB
@@ -49,23 +56,28 @@ pricesDB=createPricesDB(f"{parent_dir}app/data/cenas.sqlite","main")
 
 
 
-import functions.triggerTimes as TT
-TT_manager=TT.manager(turnLights)
+import functions.triggerTimes as TTfunc
+TT_manager=TTfunc.manager(turnLights)
 TT_manager.initiate()
 
 from functions.scraping import main as scrapeAndUpdateDB
 def scan(recalc_TT=False):
+
+
+
     print("Running regular scan")
     scrape_result=scrapeAndUpdateDB(config,pricesDB)
     if scrape_result:
         recalc_TT=True
     if recalc_TT:
         print("Recalculating TT")
-        trigger_times=TT.getTriggerTimes(pricesDB,config.data["treshold_price"])
-        false_trigger_times=TT.genPereodicalTime(8,3)
-        TT.displayTT(false_trigger_times)
+        trigger_times=TTfunc.getTriggerTimes(pricesDB,config.data["treshold_price"])
+        false_trigger_times=TTfunc.genPereodicalTime(8,10)
+        TTfunc.displayTT(trigger_times)
         
-        TT_manager.createPlan(false_trigger_times)
+        TT_manager.clearPlan()
+        for TT in trigger_times:
+            TT_manager.newTT(TT[0],[TT[2],maija])
     else:
         print("TT recalculation wasn't needed")
 
@@ -85,4 +97,4 @@ while True:
 
         print(">Spotted change")
         config.load()
-        scan(TT)
+        scan(True)
